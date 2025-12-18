@@ -1,6 +1,16 @@
 package main.java.heat;
 
+import java.util.Arrays;
+
 public record HeatMap(double[][] heat) implements Printable {
+    public static HeatMap of(double h, int dim) {
+        double[][] heat = new double[dim][dim];
+        for (double[] row : heat)
+            Arrays.fill(row, h);
+
+        return new HeatMap(heat);
+    }
+
     public HeatMap diffusion() {
         double[][] next_heat = new double[heat.length][heat[0].length];
         final double k = 0.1f;

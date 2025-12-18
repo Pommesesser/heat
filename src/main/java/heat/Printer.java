@@ -1,9 +1,12 @@
 package main.java.heat;
 
+import org.jspecify.annotations.NonNull;
+
 public record Printer() {
-    public void print(Printable printable) {
+    public void print(@NonNull Printable printable) {
         final Color[][] colors = printable.colors();
         StringBuilder sb = new StringBuilder();
+        sb.append("\u001b[2J");
         sb.append("\u001b[H");
 
         for (Color[] row : colors) {

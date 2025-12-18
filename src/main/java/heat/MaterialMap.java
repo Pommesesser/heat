@@ -1,6 +1,18 @@
 package main.java.heat;
 
+import org.jspecify.annotations.NonNull;
+
+import java.util.Arrays;
+
 public record MaterialMap(Material[][] materials) implements Printable{
+    public static MaterialMap of(@NonNull Material material, int dim) {
+        Material[][] materials = new Material[dim][dim];
+        for (Material[] row : materials)
+            Arrays.fill(row, material);
+
+        return new MaterialMap(materials);
+    }
+
     public Color[][] colors() {
         Color[][] colors = new Color[materials.length][materials[0].length];
 

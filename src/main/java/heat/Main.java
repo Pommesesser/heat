@@ -1,7 +1,8 @@
-import main.java.heat.HeatMap;
-import main.java.heat.Printer;
+import main.java.heat.*;
 
 Printer printer = new Printer();
+
+volatile int printMode = 1;
 
 void main() {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -10,21 +11,44 @@ void main() {
         System.out.print("\u001b[H");
     }));
 
-    double[][] heat = new double[40][40];
-    heat[2][0] = 500;
-    heat[2][1] = 500;
-    heat[4][8] = 1000;
-    heat[30][30] = 10000;
+    int dim = 40;
+    double[][] heat = new double[dim][dim];
+    heat[20][20] = 5000;
     HeatMap heatMap = new HeatMap(heat);
-    printer.print(heatMap);
+    Material[][] materials = new Material[dim][dim];
+    for (Material[] row : materials)
+        Arrays.fill(row, Material.WALL);
+    MaterialMap materialMap = new MaterialMap(materials);
+    Grid grid = new Grid(heatMap, materialMap);
+
+    Thread inputThread = new Thread(this::handleInput);
+    inputThread.setDaemon(true);
+    inputThread.start();
 
     while (true) {
-        heatMap = heatMap.diffusion();
-        printer.print(heatMap);
+        switch (printMode) {
+            case 1 -> printer.print(grid.heatMap());
+            case 2 -> printer.print(grid.materialMap());
+        }
+        grid = grid.simulate();
 
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+void handleInput() {
+    while (true) {
+        try {
+            int x = System.in.read();
+            switch (x) {
+                case '1' -> printMode = 1;
+                case '2' -> printMode = 2;
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
